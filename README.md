@@ -4,6 +4,11 @@
 - Kacper Skimina
 - Mateusz Stojek
 
+## Technologie
+- backend: Spring
+- frontend: React
+- baza danych: 
+
 ## Co zrobiono w repo (test)
 - testowe commity na main: każdy członek
 - oddzielne branchy: `Kacper-Skimina`, `Mateusz-Stojek`
