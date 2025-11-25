@@ -7,7 +7,7 @@
 ## Technologie
 - backend: Spring
 - frontend: React
-- baza danych: 
+- baza danych: PostgreSQL
 
 ## Co zrobiono w repo (test)
 - testowe commity na main: każdy członek
