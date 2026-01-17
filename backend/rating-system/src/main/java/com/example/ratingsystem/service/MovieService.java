@@ -22,25 +22,28 @@ public class MovieService {
     private final MovieMapper movieMapper;
     private final RatingService ratingService;
 
-      public List<MovieDTO> getAllMovies() {
+    @Transactional(readOnly = true)
+    public List<MovieDTO> getAllMovies() {
         return movieRepository.findAll()
-            .stream()
-            .map(this::mapWithAvgRating)
-            .toList();
+                .stream()
+                .map(this::mapWithAvgRating)
+                .toList();
     }
 
+    @Transactional(readOnly = true)
     public MovieDTO getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
 
         return mapWithAvgRating(movie);
     }
 
+    @Transactional(readOnly = true)
     public List<MovieDTO> searchMoviesByTitle(String title) {
         return movieRepository.findByTitleContainingIgnoreCase(title)
-            .stream()
-            .map(this::mapWithAvgRating)
-            .toList();
+                .stream()
+                .map(this::mapWithAvgRating)
+                .toList();
     }
 
     @Transactional
@@ -57,7 +60,7 @@ public class MovieService {
     @Transactional
     public MovieDTO updateMovie(Long id, MovieRequest request) {
         Movie movie = movieRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
 
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
             movie.setTitle(request.getTitle());
