@@ -18,13 +18,15 @@ public class ReviewMapper {
         dto.setComment(review.getComment());
         dto.setCreatedAt(review.getCreatedAt());
 
-        dto.setMovieId(
-            review.getMovie() != null ? review.getMovie().getId() : null
-        );
+        if (review.getMovie() != null) {
+            dto.setMovieId(review.getMovie().getId());
+            dto.setMovieTitle(review.getMovie().getTitle());
+        }
 
-        dto.setUserId(
-            review.getUser() != null ? review.getUser().getId() : null
-        );
+        if (review.getUser() != null) {
+            dto.setUserId(review.getUser().getId());
+            dto.setUsername(review.getUser().getUsername());
+        }
 
         return dto;
     }
