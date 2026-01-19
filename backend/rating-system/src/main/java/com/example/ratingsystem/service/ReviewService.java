@@ -11,6 +11,8 @@ import com.example.ratingsystem.repository.MovieRepository;
 import com.example.ratingsystem.repository.ReviewRepository;
 import com.example.ratingsystem.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,8 +58,12 @@ public class ReviewService {
         review.setComment(request.getComment());
         review.setMovie(movie);
 
-        if (request.getUserId() != null) {
-            User user = userRepository.findById(request.getUserId()).orElse(null);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()
+            && !authentication.getPrincipal().equals("anonymousUser")) {
+            String username = authentication.getName();
+            User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
             review.setUser(user);
         }
 
@@ -69,6 +75,14 @@ public class ReviewService {
     public ReviewDTO updateReview(Long id, UpdateReviewRequestDTO request) {
         Review review = reviewRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && review.getUser() != null) {
+            String currentUsername = authentication.getName();
+            if (!review.getUser().getUsername().equals(currentUsername)) {
+                throw new RuntimeException("You can only edit your own reviews");
+            }
+        }
 
         if (request.getRating() != null) {
             review.setRating(request.getRating());
@@ -83,9 +97,17 @@ public class ReviewService {
 
     @Transactional
     public void deleteReview(Long id) {
-        if (!reviewRepository.existsById(id)) {
-            throw new RuntimeException("Review not found with id: " + id);
+        Review review = reviewRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && review.getUser() != null) {
+            String currentUsername = authentication.getName();
+            if (!review.getUser().getUsername().equals(currentUsername)) {
+                throw new RuntimeException("You can only delete your own reviews");
+            }
         }
+
         reviewRepository.deleteById(id);
     }
 }
