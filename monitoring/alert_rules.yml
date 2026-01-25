@@ -1,0 +1,8 @@
+groups:
+  - name: example_alerts
+    rules:
+      - alert: HighTraffic
+        expr: http_server_requests_seconds_count > 100
+        for: 1m
+        annotations:
+          summary: "Zbyt dużo zapytań do API!"

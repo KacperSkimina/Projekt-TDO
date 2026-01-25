@@ -1,5 +1,4 @@
 services:
-  # Baza danych Postgres (wymóg na bdb)
   postgres-db:
     image: postgres:15
     container_name: postgres_db
@@ -8,22 +7,29 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     volumes:
-      - db-data:/var/lib/postgresql/data # Persistence (wymóg na dst)
+      - db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d movierating"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # Twoja aplikacja Spring Boot (Java 25)
   app:
     build: ./backend/rating-system
     container_name: spring_app
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy # Czeka na pełną gotowość bazy
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/movierating
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres_db:5432/movierating
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
 
   # Monitoring - Prometheus
   prometheus:

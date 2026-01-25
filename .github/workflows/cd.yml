@@ -3,8 +3,7 @@ name: CD - Build and Push Docker Image
 on:
   push:
     tags:
-      - 'v*' # Uruchamia się tylko przy tagach typu v1.0.5 (wymóg na bdb)
-
+      - 'v*' # Uruchamia się tylko przy tagach typu v1.0.5 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
