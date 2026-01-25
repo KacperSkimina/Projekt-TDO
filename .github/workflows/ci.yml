@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: CI - Build and Lint
 
 on:
   push:
@@ -7,16 +7,19 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-    - name: Build and Lint with Maven
-      run: mvn verify # To uruchomi testy i checkstyle/linting
-      working-directory: ./backend/rating-system
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build and Checkstyle (Linting)
+        # To polecenie uruchamia testy i plugin checkstyle dodany do pom.xml
+        run: mvn verify 
+        working-directory: ./backend/rating-system

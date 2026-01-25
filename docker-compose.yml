@@ -1,4 +1,5 @@
 services:
+  # Baza danych Postgres (wymóg na bdb)
   postgres-db:
     image: postgres:15
     container_name: postgres_db
@@ -6,22 +7,41 @@ services:
       POSTGRES_DB: movierating
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
+    volumes:
+      - db-data:/var/lib/postgresql/data # Persistence (wymóg na dst)
     ports:
       - "5432:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data
 
+  # Twoja aplikacja Spring Boot (Java 25)
   app:
     build: ./backend/rating-system
     container_name: spring_app
-    ports:
-      - "8080:8080"
     depends_on:
       - postgres-db
+    ports:
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/movierating
       SPRING_DATASOURCE_USERNAME: user
       SPRING_DATASOURCE_PASSWORD: password
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
 
 volumes:
   db-data:
