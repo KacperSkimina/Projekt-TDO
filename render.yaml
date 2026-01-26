@@ -1,10 +1,10 @@
 services:
   - type: web
     name: rating-system-api
-    env: image
-    image: ghcr.io/kacperskimina/projekt-tdo:v1.0.1 # Używamy Twojego obrazu z CD!
+    env: docker
     plan: free
     region: frankfurt
+
     envVars:
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
