@@ -33,12 +33,21 @@ services:
     volumes:
       - sqlite-data:/app/data
 
+  frontend:
+    build: ./movie-front
+    container_name: react_frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - app
+
   # Monitoring - Prometheus
   prometheus:
     image: prom/prometheus
     container_name: prometheus
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./backend/rating-system/src/main/resources/prometheus-alerts.yml:/etc/prometheus/prometheus-alerts.yml
     ports:
       - "9090:9090"
 
