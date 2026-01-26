@@ -25,6 +25,6 @@ public class Movie {
     @Column(name = "release_year")
     private Integer releaseYear;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Review> reviews;
 }

@@ -87,7 +87,24 @@ public class MovieService {
 
     private MovieDTO mapWithAvgRating(Movie movie) {
         double avgRating = ratingService.calculateAverage(movie);
-        return movieMapper.toDto(movie, avgRating);
+        MovieDTO dto = movieMapper.toDto(movie, avgRating);
+
+        if (movie.getReviews() != null) {
+            dto.setReviews(movie.getReviews().stream().map(review -> {
+                com.example.ratingsystem.dto.ReviewDTO rDto = new com.example.ratingsystem.dto.ReviewDTO();
+                rDto.setId(review.getId());
+                rDto.setRating(review.getRating());
+                rDto.setComment(review.getComment());
+                rDto.setMovieId(movie.getId());
+                if (review.getUser() != null) {
+                    rDto.setUsername(review.getUser().getUsername());
+                    rDto.setUserId(review.getUser().getId());
+                }
+                return rDto;
+            }).collect(Collectors.toList()));
+        }
+
+        return dto;
     }
 
 }
