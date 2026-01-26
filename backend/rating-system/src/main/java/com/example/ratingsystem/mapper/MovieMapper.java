@@ -10,6 +10,7 @@ public class MovieMapper {
         MovieDTO dto = new MovieDTO();
         dto.setId(movie.getId());
         dto.setTitle(movie.getTitle());
+        dto.setDirector(movie.getDirector());
         dto.setDescription(movie.getDescription());
         dto.setReleaseYear(movie.getReleaseYear());
         dto.setAverageRating(avgRating);

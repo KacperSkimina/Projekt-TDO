@@ -1,7 +1,7 @@
 package com.example.ratingsystem.controller;
 
 import com.example.ratingsystem.dto.MovieDTO;
-import com.example.ratingsystem.dto.MovieRequest;
+import com.example.ratingsystem.dto.MovieRequestDTO;
 import com.example.ratingsystem.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class MovieController {
     }
 
     @PostMapping
-    public ResponseEntity<MovieDTO> createMovie(@Valid @RequestBody MovieRequest request) {
+    public ResponseEntity<MovieDTO> createMovie(@Valid @RequestBody MovieRequestDTO request) {
         MovieDTO created = movieService.createMovie(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
@@ -41,7 +41,7 @@ public class MovieController {
     @PutMapping("/{id}")
     public ResponseEntity<MovieDTO> updateMovie(
             @PathVariable Long id,
-            @Valid @RequestBody MovieRequest request) {
+            @Valid @RequestBody MovieRequestDTO request) {
         return ResponseEntity.ok(movieService.updateMovie(id, request));
     }
 
