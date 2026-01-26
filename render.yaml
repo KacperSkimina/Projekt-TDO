@@ -10,8 +10,9 @@ services:
         fromDatabase:
           name: rating-db
           property: connectionString
-  - type: db
-    name: rating-db
+
+databases:
+  - name: rating-db
     engine: postgres
     plan: free
     region: frankfurt
