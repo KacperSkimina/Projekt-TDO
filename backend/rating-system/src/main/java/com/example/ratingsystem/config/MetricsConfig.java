@@ -15,4 +15,25 @@ public class MetricsConfig {
                 .tag("application", "movie-rating-system")
                 .register(registry);
     }
+
+    @Bean
+    public Counter authSuccessCounter(MeterRegistry registry) {
+        return Counter.builder("auth_success_total")
+                .description("Total successful authentications")
+                .register(registry);
+    }
+
+    @Bean
+    public Counter authFailureCounter(MeterRegistry registry) {
+        return Counter.builder("auth_failure_total")
+                .description("Total failed authentications")
+                .register(registry);
+    }
+
+    @Bean
+    public Counter reviewCreationCounter(MeterRegistry registry) {
+        return Counter.builder("reviews_created_total")
+                .description("Total reviews created")
+                .register(registry);
+    }
 }
