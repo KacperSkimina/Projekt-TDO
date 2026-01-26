@@ -28,3 +28,20 @@ groups:
         annotations:
           summary: "Application is down"
           description: "Movie rating system has been down for more than 1 minute"
+      - alert: HighAuthFailureRate
+        expr: rate(auth_failure_total[5m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High authentication failure rate"
+          description: "More than 5 failed auth attempts per second"
+
+      - alert: LowReviewCreationRate
+        expr: rate(reviews_created_total[1h]) < 0.1
+        for: 30m
+        labels:
+          severity: info
+        annotations:
+          summary: "Low review activity"
+          description: "Less than 0.1 reviews per second in the last hour"
