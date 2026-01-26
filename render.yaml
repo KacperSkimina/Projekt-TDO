@@ -13,6 +13,5 @@ services:
 
 databases:
   - name: rating-db
-    engine: postgres
     plan: free
     region: frankfurt
