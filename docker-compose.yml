@@ -39,6 +39,7 @@ services:
     container_name: prometheus
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./backend/rating-system/src/main/resources/prometheus-alerts.yml:/etc/prometheus/prometheus-alerts.yml
     ports:
       - "9090:9090"
 
