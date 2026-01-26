@@ -10,7 +10,9 @@ import com.example.ratingsystem.mapper.ReviewMapper;
 import com.example.ratingsystem.repository.MovieRepository;
 import com.example.ratingsystem.repository.ReviewRepository;
 import com.example.ratingsystem.repository.UserRepository;
+import io.micrometer.core.instrument.Counter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -27,23 +29,25 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final ReviewMapper reviewMapper;
 
+    private final Counter reviewCreationCounter;
+
     public List<ReviewDTO> getAllReviews() {
         return reviewRepository.findAll()
-            .stream()
-            .map(reviewMapper::toDto)
-            .toList();
+                .stream()
+                .map(reviewMapper::toDto)
+                .toList();
     }
 
     public List<ReviewDTO> getReviewsByMovieId(Long movieId) {
         return reviewRepository.findByMovieId(movieId)
-            .stream()
-            .map(reviewMapper::toDto)
-            .toList();
+                .stream()
+                .map(reviewMapper::toDto)
+                .toList();
     }
 
     public ReviewDTO getReviewById(Long id) {
         Review review = reviewRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
 
         return reviewMapper.toDto(review);
     }
@@ -51,19 +55,21 @@ public class ReviewService {
     @Transactional
     public ReviewDTO createReview(CreateReviewRequestDTO request) {
         Movie movie = movieRepository.findById(request.getMovieId())
-            .orElseThrow(() -> new RuntimeException("Movie not found with id: " + request.getMovieId()));
+                .orElseThrow(() -> new RuntimeException("Movie not found with id: " + request.getMovieId()));
 
         Review review = new Review();
         review.setRating(request.getRating());
         review.setComment(request.getComment());
         review.setMovie(movie);
+        reviewCreationCounter.increment();
+
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()
-            && !authentication.getPrincipal().equals("anonymousUser")) {
+                && !authentication.getPrincipal().equals("anonymousUser")) {
             String username = authentication.getName();
             User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
             review.setUser(user);
         }
 
@@ -74,7 +80,7 @@ public class ReviewService {
     @Transactional
     public ReviewDTO updateReview(Long id, UpdateReviewRequestDTO request) {
         Review review = reviewRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && review.getUser() != null) {
@@ -98,7 +104,7 @@ public class ReviewService {
     @Transactional
     public void deleteReview(Long id) {
         Review review = reviewRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && review.getUser() != null) {
