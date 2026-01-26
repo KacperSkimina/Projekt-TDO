@@ -1,5 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './App.css';
 
 const API_URL = "https://projekt-tdo-production.up.railway.app/api";
 
@@ -71,6 +72,8 @@ function App() {
             if (response.status === 200 || response.status === 201) {
                 alert("Recenzja dodana!");
                 fetchMovies();
+                // Czyszczenie pól po wysłaniu
+                document.getElementById(`comment-${movieId}`).value = "";
             }
         } catch (err) {
             alert("Nie udało się dodać recenzji.");
@@ -88,28 +91,28 @@ function App() {
 
             {!token ? (
                 <div className="panel">
-                    <h2 style={{ textAlign: 'center' }}>Zaloguj się lub załóż konto</h2>
-                    <div className="form-grid" style={{ display: 'flex', flexDirection: 'column', maxWidth: '400px', margin: '0 auto', gap: '10px' }}>
+                    <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Dołącz do nas</h2>
+                    <div className="form-grid-auth">
                         <input placeholder="Użytkownik" onChange={e => setUser({ ...user, username: e.target.value })} />
                         <input type="email" placeholder="Email (do rejestracji)" onChange={e => setUser({ ...user, email: e.target.value })} />
                         <input type="password" placeholder="Hasło" onChange={e => setUser({ ...user, password: e.target.value })} />
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button type="button" onClick={handleLogin} className="btn-primary" style={{ flex: 1 }}>ZALOGUJ</button>
-                            <button type="button" onClick={handleRegister} className="btn-primary" style={{ flex: 1, backgroundColor: '#444' }}>REJESTRACJA</button>
+                        <div className="auth-buttons">
+                            <button type="button" onClick={handleLogin} className="btn-primary">ZALOGUJ</button>
+                            <button type="button" onClick={handleRegister} className="btn-primary btn-secondary">REJESTRACJA</button>
                         </div>
                     </div>
                 </div>
             ) : (
                 <div className="panel">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                    <div className="panel-header">
                         <h2>Dodaj nowy film</h2>
                         <button onClick={handleLogout} className="btn-logout">Wyloguj</button>
                     </div>
-                    <form onSubmit={handleAddMovie} className="form-grid">
+                    <form onSubmit={handleAddMovie} className="form-grid-movie">
                         <input placeholder="Tytuł" value={newMovie.title} onChange={e => setNewMovie({ ...newMovie, title: e.target.value })} required />
                         <input type="number" placeholder="Rok" value={newMovie.releaseYear} onChange={e => setNewMovie({ ...newMovie, releaseYear: e.target.value })} required />
-                        <textarea placeholder="Opis..." value={newMovie.description} onChange={e => setNewMovie({ ...newMovie, description: e.target.value })} />
-                        <button type="submit" className="btn-primary">DODAJ</button>
+                        <textarea placeholder="Opis filmu..." value={newMovie.description} onChange={e => setNewMovie({ ...newMovie, description: e.target.value })} />
+                        <button type="submit" className="btn-primary">DODAJ DO KATALOGU</button>
                     </form>
                 </div>
             )}
@@ -122,29 +125,42 @@ function App() {
                             <p className="movie-description">{m.description}</p>
 
                             <div className="reviews-list">
-                                <h4 style={{ color: '#e50914' }}>Recenzje:</h4>
+                                <h4>Recenzje:</h4>
                                 {m.reviews && m.reviews.length > 0 ? m.reviews.map(rev => (
                                     <div key={rev.id} className="single-review">
-                                        {/* Dopasowane do ReviewDTO: rev.username */}
-                                        <strong>{rev.username}: </strong>
-                                        <span>{rev.comment}</span>
-                                        <span style={{ float: 'right', color: '#ffc107' }}>{rev.rating}/10 ★</span>
+                                        {/* LEWA KOLUMNA: Treść (Klasa 'review-content' spycha komentarz pod autora) */}
+                                        <div className="review-content">
+                                            <span className="review-author">{rev.username}</span>
+                                            <p className="review-comment">{rev.comment}</p>
+                                        </div>
+
+                                        {/* PRAWA KOLUMNA: Ocena (Twoje gwiazdki) */}
+                                        <div className="review-rating">
+                                            {"★".repeat(rev.rating)}
+                                            {"☆".repeat(10 - rev.rating)}
+                                        </div>
                                     </div>
-                                )) : <p>Brak opinii.</p>}
+                                )) : <p className="no-reviews">Brak opinii.</p>}
                             </div>
 
                             {token && (
                                 <div className="add-review-form">
-                                    <select id={`rating-${m.id}`}>
-                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => <option key={n} value={n}>{n}★</option>)}
-                                    </select>
-                                    <input id={`comment-${m.id}`} placeholder="Twoja recenzja..." />
-                                    <button onClick={() => handleAddReview(m.id, document.getElementById(`rating-${m.id}`).value, document.getElementById(`comment-${m.id}`).value)}>Wyślij</button>
+                                    <div className="review-inputs" style={{ display: 'flex', gap: '5px' }}>
+                                        <select id={`rating-${m.id}`} style={{ width: '60px' }}>
+                                            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => <option key={n} value={n}>{n}★</option>)}
+                                        </select>
+                                        <input id={`comment-${m.id}`} placeholder="Twoja opinia..." style={{ flex: 1 }} />
+                                    </div>
+                                    <button className="btn-primary" style={{ marginTop: '5px', padding: '8px' }}
+                                        onClick={() => handleAddReview(m.id, document.getElementById(`rating-${m.id}`).value, document.getElementById(`comment-${m.id}`).value)}>
+                                        Dodaj opinię
+                                    </button>
                                 </div>
                             )}
+
                             <div className="movie-meta">
                                 <span>{m.releaseYear}</span>
-                                <span>★ Średnia: {m.averageRating || "brak"}</span>
+                                <span>★ Średnia: {m.averageRating ? m.averageRating.toFixed(1) : "brak"}</span>
                             </div>
                         </div>
                     </div>
