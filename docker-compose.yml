@@ -30,6 +30,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
+    volumes:
+      - sqlite-data:/app/data
 
   # Monitoring - Prometheus
   prometheus:
@@ -51,3 +53,4 @@ services:
 
 volumes:
   db-data:
+  sqlite-data:

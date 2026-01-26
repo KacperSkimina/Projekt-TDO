@@ -1,7 +1,7 @@
 package com.example.ratingsystem.service;
 
 import com.example.ratingsystem.dto.MovieDTO;
-import com.example.ratingsystem.dto.MovieRequest;
+import com.example.ratingsystem.dto.MovieRequestDTO;
 import com.example.ratingsystem.entity.Movie;
 import com.example.ratingsystem.entity.Review;
 import com.example.ratingsystem.repository.MovieRepository;
@@ -43,8 +43,9 @@ class MovieServiceTest {
 
     @Test
     void shouldCreateMovie() {
-        MovieRequest request = new MovieRequest();
+        MovieRequestDTO request = new MovieRequestDTO();
         request.setTitle("Inception");
+        request.setDirector("Christopher Nolan");
         request.setDescription("A mind-bending thriller");
         request.setReleaseYear(2010);
 
@@ -52,6 +53,7 @@ class MovieServiceTest {
 
         assertNotNull(created.getId());
         assertEquals("Inception", created.getTitle());
+        assertEquals("Christopher Nolan", created.getDirector());
         assertEquals("A mind-bending thriller", created.getDescription());
         assertEquals(2010, created.getReleaseYear());
         assertEquals(0.0, created.getAverageRating());
@@ -59,26 +61,30 @@ class MovieServiceTest {
 
     @Test
     void shouldUpdateMovie() {
-        MovieRequest createRequest = new MovieRequest();
+        MovieRequestDTO createRequest = new MovieRequestDTO();
         createRequest.setTitle("Original Title");
+        createRequest.setDirector("Original Director");
         createRequest.setReleaseYear(2020);
         MovieDTO created = movieService.createMovie(createRequest);
 
-        MovieRequest updateRequest = new MovieRequest();
+        MovieRequestDTO updateRequest = new MovieRequestDTO();
         updateRequest.setTitle("Updated Title");
+        updateRequest.setDirector("Updated Director");
         updateRequest.setDescription("New description");
 
         MovieDTO updated = movieService.updateMovie(created.getId(), updateRequest);
 
         assertEquals("Updated Title", updated.getTitle());
+        assertEquals("Updated Director", updated.getDirector());
         assertEquals("New description", updated.getDescription());
         assertEquals(2020, updated.getReleaseYear());
     }
 
     @Test
     void shouldDeleteMovie() {
-        MovieRequest request = new MovieRequest();
+        MovieRequestDTO request = new MovieRequestDTO();
         request.setTitle("Movie to Delete");
+        request.setDirector("Some Director");
         request.setReleaseYear(2021);
         MovieDTO created = movieService.createMovie(request);
 
@@ -91,6 +97,7 @@ class MovieServiceTest {
     void shouldCalculateAverageRating() {
         Movie movie = new Movie();
         movie.setTitle("Test Movie");
+        movie.setDirector("Test Director");
         movie.setReleaseYear(2022);
         movie = movieRepository.save(movie);
 
@@ -111,18 +118,21 @@ class MovieServiceTest {
 
     @Test
     void shouldSearchMoviesByTitle() {
-        MovieRequest request1 = new MovieRequest();
+        MovieRequestDTO request1 = new MovieRequestDTO();
         request1.setTitle("The Dark Knight");
+        request1.setDirector("Christopher Nolan");
         request1.setReleaseYear(2008);
         movieService.createMovie(request1);
 
-        MovieRequest request2 = new MovieRequest();
+        MovieRequestDTO request2 = new MovieRequestDTO();
         request2.setTitle("The Dark Knight Rises");
+        request2.setDirector("Christopher Nolan");
         request2.setReleaseYear(2012);
         movieService.createMovie(request2);
 
-        MovieRequest request3 = new MovieRequest();
+        MovieRequestDTO request3 = new MovieRequestDTO();
         request3.setTitle("Inception");
+        request3.setDirector("Christopher Nolan");
         request3.setReleaseYear(2010);
         movieService.createMovie(request3);
 

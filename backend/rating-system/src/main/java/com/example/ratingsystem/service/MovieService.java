@@ -1,18 +1,15 @@
 package com.example.ratingsystem.service;
 
 import com.example.ratingsystem.dto.MovieDTO;
-import com.example.ratingsystem.dto.MovieRequest;
+import com.example.ratingsystem.dto.MovieRequestDTO;
 import com.example.ratingsystem.entity.Movie;
-import com.example.ratingsystem.entity.Review;
 import com.example.ratingsystem.mapper.MovieMapper;
-import com.example.ratingsystem.mapper.ReviewMapper;
 import com.example.ratingsystem.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,10 +44,10 @@ public class MovieService {
     }
 
     @Transactional
-    public MovieDTO createMovie(MovieRequest request) {
+    public MovieDTO createMovie(MovieRequestDTO request) {
         Movie movie = new Movie();
         movie.setTitle(request.getTitle());
-
+        movie.setDirector(request.getDirector());
         movie.setDescription(request.getDescription());
         movie.setReleaseYear(request.getReleaseYear());
 
@@ -59,12 +56,15 @@ public class MovieService {
     }
 
     @Transactional
-    public MovieDTO updateMovie(Long id, MovieRequest request) {
+    public MovieDTO updateMovie(Long id, MovieRequestDTO request) {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Movie not found with id: " + id));
 
         if (request.getTitle() != null && !request.getTitle().isBlank()) {
             movie.setTitle(request.getTitle());
+        }
+        if (request.getDirector() != null) {
+            movie.setDirector(request.getDirector());
         }
         if (request.getDescription() != null) {
             movie.setDescription(request.getDescription());

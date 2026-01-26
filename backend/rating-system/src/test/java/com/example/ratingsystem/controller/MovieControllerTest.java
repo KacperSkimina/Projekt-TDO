@@ -1,6 +1,6 @@
 package com.example.ratingsystem.controller;
 
-import com.example.ratingsystem.dto.MovieRequest;
+import com.example.ratingsystem.dto.MovieRequestDTO;
 import com.example.ratingsystem.entity.Role;
 import com.example.ratingsystem.entity.User;
 import com.example.ratingsystem.repository.MovieRepository;
@@ -79,8 +79,9 @@ class MovieControllerTest {
 
     @Test
     void shouldGetMovieByIdWithoutAuth() throws Exception {
-        MovieRequest request = new MovieRequest();
+        MovieRequestDTO request = new MovieRequestDTO();
         request.setTitle("Test Movie");
+        request.setDirector("Test Director");
         request.setReleaseYear(2024);
 
         String response = mockMvc.perform(post("/api/movies")
@@ -97,17 +98,20 @@ class MovieControllerTest {
         mockMvc.perform(get("/api/movies/" + movieId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(movieId))
-                .andExpect(jsonPath("$.title").value("Test Movie"));
+                .andExpect(jsonPath("$.title").value("Test Movie"))
+                .andExpect(jsonPath("$.director").value("Test Director"));
     }
 
     @Test
     void shouldSearchMoviesByTitle() throws Exception {
-        MovieRequest request1 = new MovieRequest();
+        MovieRequestDTO request1 = new MovieRequestDTO();
         request1.setTitle("The Dark Knight");
+        request1.setDirector("Christopher Nolan");
         request1.setReleaseYear(2008);
 
-        MovieRequest request2 = new MovieRequest();
+        MovieRequestDTO request2 = new MovieRequestDTO();
         request2.setTitle("Inception");
+        request2.setDirector("Christopher Nolan");
         request2.setReleaseYear(2010);
 
         mockMvc.perform(post("/api/movies")
@@ -130,8 +134,9 @@ class MovieControllerTest {
 
     @Test
     void shouldCreateMovieWithAuth() throws Exception {
-        MovieRequest request = new MovieRequest();
+        MovieRequestDTO request = new MovieRequestDTO();
         request.setTitle("New Movie");
+        request.setDirector("New Director");
         request.setDescription("A great movie");
         request.setReleaseYear(2024);
 
@@ -141,6 +146,7 @@ class MovieControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("New Movie"))
+                .andExpect(jsonPath("$.director").value("New Director"))
                 .andExpect(jsonPath("$.description").value("A great movie"))
                 .andExpect(jsonPath("$.releaseYear").value(2024))
                 .andExpect(jsonPath("$.averageRating").value(0.0));
@@ -148,8 +154,9 @@ class MovieControllerTest {
 
     @Test
     void shouldNotCreateMovieWithoutAuth() throws Exception {
-        MovieRequest request = new MovieRequest();
+        MovieRequestDTO request = new MovieRequestDTO();
         request.setTitle("New Movie");
+        request.setDirector("Some Director");
         request.setReleaseYear(2024);
 
         mockMvc.perform(post("/api/movies")
@@ -160,8 +167,9 @@ class MovieControllerTest {
 
     @Test
     void shouldUpdateMovieWithAuth() throws Exception {
-        MovieRequest createRequest = new MovieRequest();
+        MovieRequestDTO createRequest = new MovieRequestDTO();
         createRequest.setTitle("Original Title");
+        createRequest.setDirector("Original Director");
         createRequest.setReleaseYear(2023);
 
         String createResponse = mockMvc.perform(post("/api/movies")
@@ -175,8 +183,9 @@ class MovieControllerTest {
 
         Long movieId = objectMapper.readTree(createResponse).get("id").asLong();
 
-        MovieRequest updateRequest = new MovieRequest();
+        MovieRequestDTO updateRequest = new MovieRequestDTO();
         updateRequest.setTitle("Updated Title");
+        updateRequest.setDirector("Updated Director");
         updateRequest.setDescription("Updated description");
         updateRequest.setReleaseYear(2024);
 
@@ -186,13 +195,14 @@ class MovieControllerTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.director").value("Updated Director"))
                 .andExpect(jsonPath("$.description").value("Updated description"))
                 .andExpect(jsonPath("$.releaseYear").value(2024));
     }
 
     @Test
     void shouldNotUpdateMovieWithoutAuth() throws Exception {
-        MovieRequest request = new MovieRequest();
+        MovieRequestDTO request = new MovieRequestDTO();
         request.setTitle("Updated Title");
 
         mockMvc.perform(put("/api/movies/1")
@@ -203,8 +213,9 @@ class MovieControllerTest {
 
     @Test
     void shouldDeleteMovieWithAuth() throws Exception {
-        MovieRequest request = new MovieRequest();
+        MovieRequestDTO request = new MovieRequestDTO();
         request.setTitle("Movie to Delete");
+        request.setDirector("Director to Delete");
         request.setReleaseYear(2024);
 
         String response = mockMvc.perform(post("/api/movies")
@@ -244,7 +255,7 @@ class MovieControllerTest {
 
     @Test
     void shouldValidateMovieRequest() throws Exception {
-        MovieRequest invalidRequest = new MovieRequest();
+        MovieRequestDTO invalidRequest = new MovieRequestDTO();
         // Missing title
 
         mockMvc.perform(post("/api/movies")
