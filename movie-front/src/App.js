@@ -1,16 +1,14 @@
 ﻿import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-// To jest adres Twojego backendu na Railway
 const API_URL = "https://projekt-tdo-production.up.railway.app/api";
 
 function App() {
     const [movies, setMovies] = useState([]);
     const [token, setToken] = useState(localStorage.getItem('token'));
-    const [user, setUser] = useState({ username: '', password: '' });
+    const [user, setUser] = useState({ username: '', password: '', email: '' });
     const [newMovie, setNewMovie] = useState({ title: '', releaseYear: 2024, description: '' });
 
-    // 1. Pobieranie filmów
     const fetchMovies = async () => {
         try {
             const res = await axios.get(`${API_URL}/movies`);
@@ -24,11 +22,13 @@ function App() {
         fetchMovies();
     }, []);
 
-    // 2. Logowanie
     const handleLogin = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         try {
-            const res = await axios.post(`${API_URL}/auth/login`, user);
+            const res = await axios.post(`${API_URL}/auth/login`, {
+                username: user.username,
+                password: user.password
+            });
             localStorage.setItem('token', res.data.token);
             setToken(res.data.token);
             alert("Zalogowano pomyślnie!");
@@ -37,21 +37,43 @@ function App() {
         }
     };
 
-    // 3. Dodawanie filmu 
+    const handleRegister = async (e) => {
+        if (e) e.preventDefault();
+        try {
+            await axios.post(`${API_URL}/auth/register`, user);
+            alert("Konto utworzone! Teraz możesz się zalogować.");
+        } catch (err) {
+            alert("Błąd rejestracji! Email musi być poprawny, a hasło min. 6 znaków.");
+        }
+    };
+
     const handleAddMovie = async (e) => {
         e.preventDefault();
         try {
             await axios.post(`${API_URL}/movies`, newMovie, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                headers: { Authorization: `Bearer ${token}` }
             });
-            
             setNewMovie({ title: '', releaseYear: 2024, description: '' });
             fetchMovies();
-            alert("Film dodany do bazy!");
+            alert("Film dodany!");
         } catch (err) {
-            alert("Błąd: Twoja sesja wygasła lub nie masz uprawnień (403).");
+            alert("Błąd: Sesja wygasła lub brak uprawnień (403).");
+        }
+    };
+
+    const handleAddReview = async (movieId, rating, comment) => {
+        if (!token) return;
+        try {
+            const response = await axios.post(`${API_URL}/reviews`,
+                { movieId, rating: parseInt(rating), comment },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (response.status === 200 || response.status === 201) {
+                alert("Recenzja dodana!");
+                fetchMovies();
+            }
+        } catch (err) {
+            alert("Nie udało się dodać recenzji.");
         }
     };
 
@@ -61,55 +83,72 @@ function App() {
     };
 
     return (
-        <div style={{ padding: '40px', fontFamily: 'Segoe UI, sans-serif', maxWidth: '800px', margin: '0 auto' }}>
-            <h1 style={{ color: '#2c3e50', textAlign: 'center' }}>🎬 System Oceny Filmów</h1>
-            <hr />
+        <div className="app-container">
+            <h1 className="main-title">🎬 MOVIE BASE</h1>
 
             {!token ? (
-                <div style={{ background: '#ecf0f1', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-                    <h3>🔐 Zaloguj się, aby dodać film</h3>
-                    <form onSubmit={handleLogin}>
-                        <input
-                            style={{ padding: '8px', marginRight: '10px' }}
-                            placeholder="Username"
-                            onChange={e => setUser({ ...user, username: e.target.value })}
-                        />
-                        <input
-                            style={{ padding: '8px', marginRight: '10px' }}
-                            type="password"
-                            placeholder="Password"
-                            onChange={e => setUser({ ...user, password: e.target.value })}
-                        />
-                        <button style={{ padding: '8px 20px', cursor: 'pointer' }} type="submit">Zaloguj</button>
-                    </form>
+                <div className="panel">
+                    <h2 style={{ textAlign: 'center' }}>Zaloguj się lub załóż konto</h2>
+                    <div className="form-grid" style={{ display: 'flex', flexDirection: 'column', maxWidth: '400px', margin: '0 auto', gap: '10px' }}>
+                        <input placeholder="Użytkownik" onChange={e => setUser({ ...user, username: e.target.value })} />
+                        <input type="email" placeholder="Email (do rejestracji)" onChange={e => setUser({ ...user, email: e.target.value })} />
+                        <input type="password" placeholder="Hasło" onChange={e => setUser({ ...user, password: e.target.value })} />
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button type="button" onClick={handleLogin} className="btn-primary" style={{ flex: 1 }}>ZALOGUJ</button>
+                            <button type="button" onClick={handleRegister} className="btn-primary" style={{ flex: 1, backgroundColor: '#444' }}>REJESTRACJA</button>
+                        </div>
+                    </div>
                 </div>
             ) : (
-                <div style={{ background: '#d5f5e3', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-                    <h3>✅ Jesteś zalogowany!</h3>
-                    <form onSubmit={handleAddMovie}>
-                        <h4>Dodaj nowy film:</h4>
-                        <input style={{ display: 'block', margin: '5px 0', width: '100%', padding: '8px' }} placeholder="Tytuł" value={newMovie.title} onChange={e => setNewMovie({ ...newMovie, title: e.target.value })} required />
-
-                        <textarea style={{ display: 'block', margin: '5px 0', width: '100%', padding: '8px' }} placeholder="Opis filmu" value={newMovie.description} onChange={e => setNewMovie({ ...newMovie, description: e.target.value })} />
-
-                        <input style={{ display: 'block', margin: '5px 0', width: '100%', padding: '8px' }} type="number" placeholder="Rok" value={newMovie.releaseYear} onChange={e => setNewMovie({ ...newMovie, releaseYear: e.target.value })} required />
-
-                        <button style={{ padding: '10px 20px', background: '#27ae60', color: 'white', border: 'none', cursor: 'pointer', marginTop: '10px' }} type="submit">Dodaj Film</button>
+                <div className="panel">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+                        <h2>Dodaj nowy film</h2>
+                        <button onClick={handleLogout} className="btn-logout">Wyloguj</button>
+                    </div>
+                    <form onSubmit={handleAddMovie} className="form-grid">
+                        <input placeholder="Tytuł" value={newMovie.title} onChange={e => setNewMovie({ ...newMovie, title: e.target.value })} required />
+                        <input type="number" placeholder="Rok" value={newMovie.releaseYear} onChange={e => setNewMovie({ ...newMovie, releaseYear: e.target.value })} required />
+                        <textarea placeholder="Opis..." value={newMovie.description} onChange={e => setNewMovie({ ...newMovie, description: e.target.value })} />
+                        <button type="submit" className="btn-primary">DODAJ</button>
                     </form>
-                    <button onClick={handleLogout} style={{ marginTop: '20px', background: 'none', border: '1px solid red', color: 'red', cursor: 'pointer' }}>Wyloguj się</button>
                 </div>
             )}
 
-            <h2>🎥 Katalog Filmów</h2>
-            <div style={{ display: 'grid', gap: '15px' }}>
-                {movies.length > 0 ? movies.map(m => (
-                    <div key={m.id} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '5px' }}>
-                        <h3 style={{ margin: '0 0 10px 0' }}>{m.title}</h3>
-                        <p style={{ color: '#7f8c8d' }}>{m.description}</p>
-                        <p><strong>Rok wydania:</strong> {m.releaseYear}</p>
-                        {}
+            <div className="movie-grid">
+                {movies.map(m => (
+                    <div key={m.id} className="movie-card">
+                        <div className="movie-info">
+                            <h3 className="movie-title">{m.title}</h3>
+                            <p className="movie-description">{m.description}</p>
+
+                            <div className="reviews-list">
+                                <h4 style={{ color: '#e50914' }}>Recenzje:</h4>
+                                {m.reviews && m.reviews.length > 0 ? m.reviews.map(rev => (
+                                    <div key={rev.id} className="single-review">
+                                        {/* Dopasowane do ReviewDTO: rev.username */}
+                                        <strong>{rev.username}: </strong>
+                                        <span>{rev.comment}</span>
+                                        <span style={{ float: 'right', color: '#ffc107' }}>{rev.rating}/10 ★</span>
+                                    </div>
+                                )) : <p>Brak opinii.</p>}
+                            </div>
+
+                            {token && (
+                                <div className="add-review-form">
+                                    <select id={`rating-${m.id}`}>
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => <option key={n} value={n}>{n}★</option>)}
+                                    </select>
+                                    <input id={`comment-${m.id}`} placeholder="Twoja recenzja..." />
+                                    <button onClick={() => handleAddReview(m.id, document.getElementById(`rating-${m.id}`).value, document.getElementById(`comment-${m.id}`).value)}>Wyślij</button>
+                                </div>
+                            )}
+                            <div className="movie-meta">
+                                <span>{m.releaseYear}</span>
+                                <span>★ Średnia: {m.averageRating || "brak"}</span>
+                            </div>
+                        </div>
                     </div>
-                )) : <p>Ładowanie filmów lub brak filmów w bazie...</p>}
+                ))}
             </div>
         </div>
     );
