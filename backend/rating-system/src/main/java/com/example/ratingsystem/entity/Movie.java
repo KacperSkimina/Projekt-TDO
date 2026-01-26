@@ -19,7 +19,7 @@ public class Movie {
 
     @Column(nullable = false)
     private String title;
-
+    private String director;
     private String description;
 
     @Column(name = "release_year")

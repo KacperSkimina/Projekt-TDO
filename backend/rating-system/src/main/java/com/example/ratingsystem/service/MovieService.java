@@ -50,6 +50,7 @@ public class MovieService {
     public MovieDTO createMovie(MovieRequest request) {
         Movie movie = new Movie();
         movie.setTitle(request.getTitle());
+
         movie.setDescription(request.getDescription());
         movie.setReleaseYear(request.getReleaseYear());
 
