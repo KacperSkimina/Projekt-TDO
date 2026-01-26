@@ -6,7 +6,9 @@ import com.example.ratingsystem.entity.User;
 import com.example.ratingsystem.repository.UserRepository;
 import com.example.ratingsystem.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,6 +25,9 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+
+    private final Counter authSuccessCounter;
+    private final Counter authFailureCounter;
 
     @Transactional
     public AuthResponseDTO register(RegisterRequestDTO request) {
@@ -49,20 +54,26 @@ public class AuthService {
     }
 
     public AuthResponseDTO login(LoginRequestDTO request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
+            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
 
-        String token = jwtUtil.generateToken(userDetails);
+            String token = jwtUtil.generateToken(userDetails);
 
-        return new AuthResponseDTO(token, user.getId(), user.getUsername(), user.getEmail());
+            authSuccessCounter.increment();
+            return new AuthResponseDTO(token, user.getId(), user.getUsername(), user.getEmail());
+        } catch (BadCredentialsException e) {
+            authFailureCounter.increment();
+            throw e;
+        }
     }
 }
