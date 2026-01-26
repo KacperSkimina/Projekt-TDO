@@ -6,6 +6,7 @@ import lombok.Data;
 public class MovieDTO {
     private Long id;
     private String title;
+    private String director;
     private String description;
     private Integer releaseYear;
     private Double averageRating;
