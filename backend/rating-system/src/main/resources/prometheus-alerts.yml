@@ -1,0 +1,30 @@
+groups:
+  - name: movie_rating_alerts
+    interval: 30s
+    rules:
+      - alert: HighRequestRate
+        expr: rate(http_requests_total[1m]) > 10
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High request rate detected"
+          description: "Request rate is {{ $value }} requests/sec (threshold: 10)"
+
+      - alert: VeryHighRequestRate
+        expr: rate(http_requests_total[1m]) > 50
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Very high request rate detected"
+          description: "Request rate is {{ $value }} requests/sec (threshold: 50)"
+
+      - alert: ApplicationDown
+        expr: up{job="movie-rating-system"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Application is down"
+          description: "Movie rating system has been down for more than 1 minute"
