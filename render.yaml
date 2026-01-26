@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: rating-system-api
+    env: docker
+    plan: free
+    region: frankfurt
+
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: rating-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: rating-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: rating-db
+          property: password
+
+databases:
+  - name: rating-db
+    plan: free
+    region: frankfurt
