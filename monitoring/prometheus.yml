@@ -8,4 +8,4 @@ scrape_configs:
       - targets: ['app:8080'] # 'app' to nazwa serwisu w docker-compose
 
 rule_files:
-  - "alert_rules.yml"
+  - "/etc/prometheus/alerts.yml"
