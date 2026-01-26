@@ -4,8 +4,8 @@ Spring Boot REST API for movie rating system.
 
 ## Tech Stack
 
-- Java 21 (lub 17)
-- Spring Boot 3.x
+- Java 25
+- Spring Boot 4.0.1
 - Spring Security + JWT
 - Spring Data JPA
 - PostgreSQL / SQLite
@@ -15,7 +15,7 @@ Spring Boot REST API for movie rating system.
 ## Local Development
 
 ### Prerequisites
-- Java 21 JDK
+- Java 25 JDK
 - Maven 3.9+
 
 ### Run with SQLite (development)
@@ -26,7 +26,7 @@ mvn spring-boot:run -Dspring-boot.run.profiles=sqlite
 ### Run with PostgreSQL
 ```bash
 # Start PostgreSQL first
-docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:16
+docker run -d -p 5453:5432 -e POSTGRES_PASSWORD=postgres postgres:16
 
 mvn spring-boot:run
 ```
