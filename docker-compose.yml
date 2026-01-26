@@ -33,6 +33,14 @@ services:
     volumes:
       - sqlite-data:/app/data
 
+  frontend:
+    build: ./movie-front
+    container_name: react_frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - app
+
   # Monitoring - Prometheus
   prometheus:
     image: prom/prometheus
