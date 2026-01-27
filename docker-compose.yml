@@ -31,8 +31,8 @@ services:
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
       - SPRING_PROFILES_ACTIVE=postgres
-    volumes:
-      - sqlite-data:/app/data
+    #volumes:
+     # - sqlite-data:/app/data
 
   frontend:
     build: ./movie-front
