@@ -27,31 +27,32 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
 
     @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-            .cors(org.springframework.security.config.Customizer.withDefaults())
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**").permitAll()
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll()
 
-            .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
 
-            .requestMatchers(HttpMethod.GET, "/api/movies/**").permitAll()
-            .requestMatchers("/api/movies/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/movies/**").permitAll()
+                        .requestMatchers("/api/movies/**").authenticated()
 
-            .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
-            .requestMatchers("/api/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        .requestMatchers("/api/reviews/**").authenticated()
 
-            .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        )
-        .authenticationProvider(authenticationProvider())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-}
+        return http.build();
+    }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
