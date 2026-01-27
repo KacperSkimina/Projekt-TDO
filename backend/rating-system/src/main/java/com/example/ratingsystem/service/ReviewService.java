@@ -115,5 +115,6 @@ public class ReviewService {
         }
 
         reviewRepository.deleteById(id);
+        reviewRepository.flush();
     }
 }

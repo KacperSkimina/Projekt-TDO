@@ -6,8 +6,10 @@ import com.example.ratingsystem.dto.UpdateReviewRequestDTO;
 import com.example.ratingsystem.entity.Movie;
 import com.example.ratingsystem.repository.MovieRepository;
 import com.example.ratingsystem.repository.ReviewRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class ReviewServiceTest {
 
     @Autowired
@@ -26,6 +29,10 @@ class ReviewServiceTest {
 
     @Autowired
     private MovieRepository movieRepository;
+
+    @Autowired
+    private EntityManager entityManager;
+
 
     private Movie testMovie;
 
@@ -82,6 +89,8 @@ class ReviewServiceTest {
         ReviewDTO created = reviewService.createReview(request);
 
         reviewService.deleteReview(created.getId());
+        entityManager.flush();
+        entityManager.clear();
 
         assertFalse(reviewRepository.existsById(created.getId()));
     }
