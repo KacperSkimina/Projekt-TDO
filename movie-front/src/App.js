@@ -2,7 +2,7 @@
 import axios from 'axios';
 import './App.css';
 
-const API_URL = "https://projekt-tdo-production.up.railway.app/api";
+const API_URL = "https://rating-system-api-production.up.railway.app/api";
 
 function App() {
     const [movies, setMovies] = useState([]);
